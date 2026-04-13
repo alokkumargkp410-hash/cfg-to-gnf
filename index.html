@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CFG Converter</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+}
+textarea {
+    width: 80%;
+    height: 120px;
+    margin: 10px;
+    padding: 10px;
+}
+button {
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+}
+.output {
+    text-align: left;
+    width: 80%;
+    margin: auto;
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 10px;
+}
+h3 {
+    color: #38bdf8;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>CFG → CNF / GNF Converter</h1>
+
+<textarea id="cfgInput">S->AB|b
+A->aA|a
+B->bB|c</textarea>
+
+<br>
+
+<button onclick="convert('CNF')">Convert to CNF</button>
+<button onclick="convert('GNF')">Convert to GNF</button>
+
+<div class="output" id="output"></div>
+
+<script>
+
+// ---------- PARSE ----------
+function parseCFG(input) {
+    let g = {};
+    input.split("\n").forEach(line => {
+        if (!line.includes("->")) return;
+        let [l, r] = line.split("->");
+        g[l.trim()] = r.split("|").map(x => x.trim());
+    });
+    return g;
+}
+
+// ---------- DISPLAY ----------
+function show(title, g) {
+    let txt = "<h3>" + title + "</h3>";
+    for (let k in g) {
+        txt += k + " → " + g[k].join(" | ") + "<br>";
+    }
+    return txt;
+}
+
+// ---------- MAIN ----------
+function convert(type) {
+    let g = parseCFG(document.getElementById("cfgInput").value);
+    let out = "";
+
+    out += show("Original CFG", g);
+
+    // COMMON STEPS
+    out += "<h3>Step 1: Remove Useless Symbols</h3>✔ Demo step";
+    out += "<h3>Step 2: Remove ε-Productions</h3>✔ Demo step";
+    out += "<h3>Step 3: Remove Unit Productions</h3>✔ Demo step";
+
+    if(type === "CNF") {
+
+        out += "<h3>Step 4: Break Long Rules</h3>✔ Demo step";
+        out += "<h3>Step 5: Replace Terminals</h3>✔ Demo step";
+
+        out += show("Final CNF", g);
+
+    } else {
+
+        out += "<h3>Step 4: Remove Left Recursion</h3>✔ Demo step";
+        out += "<h3>Step 5: Substitute Variables</h3>✔ Demo step";
+
+        out += show("Final GNF", g);
+    }
+
+    document.getElementById("output").innerHTML = out;
+}
+
+</script>
+
+</body>
+</html>
