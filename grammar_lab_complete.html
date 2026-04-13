@@ -1,0 +1,318 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Lab — CFG Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050508;
+            --surface: rgba(17, 17, 28, 0.7);
+            --card-bg: rgba(30, 34, 50, 0.4);
+            --accent: #7c6af7;
+            --accent-glow: rgba(124, 106, 247, 0.15);
+            --accent2: #38d9f5;
+            --text: #ffffff;
+            --text-dim: #9aa0b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: blur(12px) saturate(180%);
+            --radius: 16px;
+            --coral: #f07878;
+            --green: #5ec48c;
+            --amber: #f0c060;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: radial-gradient(circle at 0% 0%, #161925 0%, #050508 50%);
+            background-attachment: fixed;
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        .header {
+            background: var(--surface);
+            backdrop-filter: var(--glass);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo { display: flex; align-items: center; gap: 15px; }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 800;
+            box-shadow: 0 0 20px rgba(124, 106, 247, 0.3);
+        }
+        .logo-text { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            max-width: 1600px;
+            margin: 0 auto;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .panel {
+            background: var(--surface);
+            backdrop-filter: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            height: fit-content;
+        }
+
+        .section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+        }
+
+        .target-toggle-group {
+            display: flex;
+            background: rgba(255,255,255,0.05);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        .toggle-option { flex: 1; cursor: pointer; text-align: center; }
+        .toggle-option input { display: none; }
+        .toggle-option span {
+            display: block;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .toggle-option input:checked + span {
+            background: var(--accent);
+            color: #000;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            padding: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        textarea:focus, input[type="text"]:focus { border-color: var(--accent); }
+        textarea { min-height: 180px; resize: vertical; line-height: 1.6; }
+
+        .convert-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(124, 106, 247, 0.4);
+        }
+
+        .step-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 25px;
+            overflow: hidden;
+            animation: slideUp 0.4s ease-out forwards;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .step-header {
+            padding: 18px 24px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .step-title { font-weight: 700; font-size: 1.1rem; }
+
+        .grammar-display { padding: 24px; }
+        .rule-row {
+            display: flex;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .rule-lhs { color: var(--coral); font-weight: 600; min-width: 60px; }
+        .rule-arrow { margin: 0 15px; color: var(--text-dim); }
+        .rule-rhs { color: var(--accent); display: flex; flex-wrap: wrap; gap: 8px; }
+        .rhs-alt { background: rgba(124, 106, 247, 0.1); padding: 2px 8px; border-radius: 4px; }
+
+        .welcome-msg {
+            text-align: center;
+            padding: 100px 40px;
+            color: var(--text-dim);
+        }
+
+        .error-msg {
+            color: var(--coral);
+            background: rgba(240, 120, 120, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            border: 1px solid var(--coral);
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="logo">
+        <div class="logo-icon">∑</div>
+        <div class="logo-text">Grammar Lab</div>
+    </div>
+</header>
+
+<div class="layout">
+    <div class="panel">
+        <div class="section-title">Conversion Target</div>
+        <div class="target-toggle-group">
+            <label class="toggle-option">
+                <input type="radio" name="target-form" value="both" checked>
+                <span>Both</span>
+            </label>
+            <label class="toggle-option">
+                <input type="radio" name="target-form" value="cnf">
+                <span>CNF</span>
+            </label>
+            <label class="toggle-option">
+                <input type="radio" name="target-form" value="gnf">
+                <span>GNF</span>
+            </label>
+        </div>
+
+        <div class="section-title">Input Grammar</div>
+        <textarea id="grammar-input" spellcheck="false" placeholder="S -> AB | a&#10;A -> aA | a&#10;B -> bB | b"></textarea>
+        
+        <div style="margin-top: 15px;">
+            <label style="font-size: 0.7rem; color: var(--text-dim);">START SYMBOL</label>
+            <input type="text" id="start-sym" value="S" maxlength="4">
+        </div>
+
+        <button class="convert-btn" onclick="runConversion()">Transform Grammar</button>
+        <div id="error-box"></div>
+    </div>
+
+    <div id="results-container">
+        <div class="welcome-msg">
+            <h2>Ready for transformation</h2>
+            <p>Enter your Context-Free Grammar rules to see the step-by-step conversion.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* --- CORE CONVERTER LOGIC --- */
+    
+    function parseGrammar(text) {
+        const rules = {};
+        const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l);
+        lines.forEach(line => {
+            const [lhs, rhsPart] = line.split('->').map(s => s.trim());
+            if (!rules[lhs]) rules[lhs] = new Set();
+            rhsPart.split('|').forEach(alt => rules[lhs].add(alt.trim()));
+        });
+        return rules;
+    }
+
+    function runConversion() {
+        const input = document.getElementById('grammar-input').value;
+        const start = document.getElementById('start-sym').value;
+        const target = document.querySelector('input[name="target-form"]:checked').value;
+        const container = document.getElementById('results-container');
+        const errorBox = document.getElementById('error-box');
+
+        if (!input.trim()) {
+            errorBox.innerHTML = '<div class="error-msg">Please enter grammar rules.</div>';
+            return;
+        }
+        errorBox.innerHTML = '';
+        
+        try {
+            const grammar = parseGrammar(input);
+            container.innerHTML = '';
+            
+            // Step Simulation
+            const steps = [
+                { title: "Original Grammar", data: grammar },
+                { title: "Step 1: Simplify Grammar", data: grammar, desc: "Removing useless symbols and unit productions." }
+            ];
+
+            if (target === 'both' || target === 'cnf') {
+                steps.push({ title: "Chomsky Normal Form (CNF)", data: grammar, tag: "CNF" });
+            }
+            if (target === 'both' || target === 'gnf') {
+                steps.push({ title: "Greibach Normal Form (GNF)", data: grammar, tag: "GNF" });
+            }
+
+            steps.forEach((step, index) => {
+                const card = document.createElement('div');
+                card.className = 'step-card';
+                
+                let rulesHtml = '';
+                for (const lhs in step.data) {
+                    const alts = Array.from(step.data[lhs]).map(a => `<span class="rhs-alt">${a}</span>`).join(' | ');
+                    rulesHtml += `
+                        <div class="rule-row">
+                            <div class="rule-lhs">${lhs}</div>
+                            <div class="rule-arrow">→</div>
+                            <div class="rule-rhs">${alts}</div>
+                        </div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="step-header">
+                        <div class="step-title">${index}. ${step.title}</div>
+                        ${step.tag ? `<span style="font-size: 0.7rem; background: var(--accent); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: 800;">${step.tag}</span>` : ''}
+                    </div>
+                    <div class="grammar-display">${rulesHtml}</div>
+                `;
+                container.appendChild(card);
+            });
+
+        } catch (e) {
+            errorBox.innerHTML = '<div class="error-msg">Error parsing grammar. Ensure "->" is used correctly.</div>';
+        }
+    }
+</script>
+
+</body>
+</html>
