@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CFG → CNF / GNF Converter</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-bracket">&lang;</span>
+      <span class="logo-text">CFG<span class="logo-arrow">→</span>NF</span>
+      <span class="logo-bracket">&rang;</span>
+    </div>
+    <p class="tagline">Context-Free Grammar Normal Form Converter</p>
+  </div>
+</header>
+
+<main>
+  <!-- INPUT SECTION -->
+  <section class="card input-card" id="inputSection">
+    <div class="card-label">GRAMMAR INPUT</div>
+
+    <div class="grammar-meta">
+      <div class="field-group">
+        <label>Start Symbol</label>
+        <input type="text" id="startSymbol" value="S" maxlength="3" class="meta-input" />
+      </div>
+      <div class="field-group">
+        <label>Variables (comma-separated)</label>
+        <input type="text" id="variables" value="S, A, B" class="meta-input" />
+      </div>
+      <div class="field-group">
+        <label>Terminals (comma-separated)</label>
+        <input type="text" id="terminals" value="a, b" class="meta-input" />
+      </div>
+    </div>
+
+    <div class="productions-area">
+      <label>Productions <span class="hint">(one per line, e.g. S → AB | a)</span></label>
+      <textarea id="productionInput" rows="7" placeholder="S → AB | ε&#10;A → aA | a&#10;B → bB | b"></textarea>
+    </div>
+
+    <div class="sample-btns">
+      <span class="samples-label">Load Sample:</span>
+      <button class="sample-btn" onclick="loadSample('cnf1')">Grammar 1</button>
+      <button class="sample-btn" onclick="loadSample('cnf2')">Grammar 2</button>
+      <button class="sample-btn" onclick="loadSample('gnf1')">Grammar 3</button>
+    </div>
+
+    <!-- TARGET SELECTION -->
+    <div class="target-select">
+      <div class="target-label">Convert to:</div>
+      <div class="target-options">
+        <button class="target-btn active" id="btnCNF" onclick="selectTarget('CNF')">
+          <span class="target-acronym">CNF</span>
+          <span class="target-name">Chomsky Normal Form</span>
+          <div class="target-steps-preview">Useless → ε → Unit → Break → Replace</div>
+        </button>
+        <button class="target-btn" id="btnGNF" onclick="selectTarget('GNF')">
+          <span class="target-acronym">GNF</span>
+          <span class="target-name">Greibach Normal Form</span>
+          <div class="target-steps-preview">Useless → ε → Unit → Left Rec → Substitute</div>
+        </button>
+      </div>
+    </div>
+
+    <button class="convert-btn" onclick="runConversion()">
+      <span>Convert Grammar</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </section>
+
+  <!-- STEPS SECTION -->
+  <section class="steps-container" id="stepsSection" style="display:none">
+    <div class="steps-header">
+      <div class="card-label" id="stepsLabel">CONVERSION STEPS</div>
+      <div class="pipeline" id="pipeline"></div>
+    </div>
+
+    <div id="stepsContent"></div>
+
+    <div class="final-result" id="finalResult"></div>
+  </section>
+</main>
+
+<footer>
+  <span>CFG Normal Form Converter &mdash; Theory of Computation</span>
+</footer>
+
+<script src="converter.js"></script>
+</body>
+</html>
